@@ -12,17 +12,17 @@ function createControllerUi() {
   controllerUiContainer.style.backgroundColor = 'white';
   controllerUiContainer.style.border = '1px solid black';
 
-  const controllerUiCloseButton = document.createElement('button');
-  controllerUiCloseButton.innerText = 'Close UI';
-  controllerUiCloseButton.addEventListener('click', () => {
+  const closeUIButton = document.createElement('button');
+  closeUIButton.innerText = 'Close UI';
+  closeUIButton.addEventListener('click', () => {
     controllerUiContainer.remove();
     controllerUiVisible = false;
   });
 
-  const controllerUiInfo = document.createElement('div');
-  controllerUiInfo.id = 'controller-info'; // Assign an ID for updating
-  controllerUiInfo.innerText = 'Controller Readings:';
-  controllerUiContainer.appendChild(controllerUiInfo);
+  // Create the <div> element with ID "controller-info"
+  const controllerInfo = document.createElement('div');
+  controllerInfo.id = 'controller-info'; // Assign an ID for updating
+  controllerUiContainer.appendChild(controllerInfo);
 
   document.body.appendChild(controllerUiContainer);
 }
