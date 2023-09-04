@@ -141,10 +141,14 @@ function updateStatus() {
 
 function scangamepads() {
   const gamepads = navigator.getGamepads();
-  document.querySelector("#noDevices").style.display = gamepads.filter(Boolean)
-    .length
-    ? "none"
-    : "block";
+  const noDevicesElement = document.querySelector("#noDevices");
+
+  if (noDevicesElement) {
+    noDevicesElement.style.display = gamepads && gamepads.length && gamepads.filter(Boolean).length
+      ? "none"
+      : "block";
+  }
+
   for (const gamepad of gamepads) {
     if (gamepad) {
       // Can be null if disconnected during the session
@@ -161,5 +165,3 @@ window.addEventListener("gamepadconnected", connecthandler);
 window.addEventListener("gamepaddisconnected", disconnecthandler);
 
 if (!haveEvents) {
-  setInterval(scangamepads, 500);
-}
