@@ -1,3 +1,11 @@
+// This gets controller input to the page.
+// but idk how to make it control the game itself.
+
+
+
+
+const plugin_name = "controller support" 
+
 const haveEvents = "ongamepadconnected" in window;
 const controllers = {};
 let isControllerVisible = false;
