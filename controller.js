@@ -1,5 +1,6 @@
 const haveEvents = "ongamepadconnected" in window;
 const controllers = {};
+let isControllerVisible = false;
 
 // Define the CSS styles inline
 const cssStyles = `
@@ -41,7 +42,9 @@ styleElement.textContent = cssStyles;
 document.head.appendChild(styleElement);
 
 function connecthandler(e) {
-  addgamepad(e.gamepad);
+  if (!isControllerVisible) {
+    addgamepad(e.gamepad);
+  }
 }
 
 function addgamepad(gamepad) {
@@ -57,7 +60,7 @@ function addgamepad(gamepad) {
   closeButton.className = "close-button";
   closeButton.addEventListener("click", () => {
     // Handle close button click
-    removegamepad(gamepad);
+    toggleControllerVisibility();
   });
   d.appendChild(closeButton);
 
@@ -90,6 +93,9 @@ function addgamepad(gamepad) {
 
   document.body.appendChild(d);
   requestAnimationFrame(updateStatus);
+
+  // Set the controller UI as visible
+  isControllerVisible = true;
 }
 
 function disconnecthandler(e) {
@@ -98,7 +104,9 @@ function disconnecthandler(e) {
 
 function removegamepad(gamepad) {
   const d = document.getElementById(`controller${gamepad.index}`);
-  document.body.removeChild(d);
+  if (d) {
+    document.body.removeChild(d);
+  }
   delete controllers[gamepad.index];
 }
 
@@ -160,6 +168,13 @@ function scangamepads() {
     }
   }
 }
+
+// Listen for the "\" key press to toggle the controller UI visibility
+document.addEventListener("keydown", (event) => {
+  if (event.key === "\\") {
+    toggleControllerVisibility();
+  }
+});
 
 window.addEventListener("gamepadconnected", connecthandler);
 window.addEventListener("gamepaddisconnected", disconnecthandler);
