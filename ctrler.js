@@ -25,7 +25,11 @@ function createControllerUi() {
   controllerUiContainer.appendChild(controllerInfo);
 
   document.body.appendChild(controllerUiContainer);
+
+  // Add initial content to controllerInfo
+  controllerInfo.innerHTML = 'Controller Readings:<br>';
 }
+
 
 function updateControllerUiInfo() {
   const gamepads = navigator.getGamepads();
