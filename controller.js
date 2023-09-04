@@ -165,3 +165,5 @@ window.addEventListener("gamepadconnected", connecthandler);
 window.addEventListener("gamepaddisconnected", disconnecthandler);
 
 if (!haveEvents) {
+  setInterval(scangamepads, 500);
+}
