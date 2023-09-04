@@ -60,7 +60,7 @@ function addgamepad(gamepad) {
   closeButton.className = "close-button";
   closeButton.addEventListener("click", () => {
     // Handle close button click
-    toggleControllerVisibility();
+    removegamepad(gamepad);
   });
   d.appendChild(closeButton);
 
@@ -108,6 +108,11 @@ function removegamepad(gamepad) {
     document.body.removeChild(d);
   }
   delete controllers[gamepad.index];
+  // Set the controller UI as not visible if no controllers are left
+  if (Object.keys(controllers).length === 0) {
+    isControllerVisible = false;
+    console.log("No controller connected");
+  }
 }
 
 function updateStatus() {
@@ -175,6 +180,15 @@ document.addEventListener("keydown", (event) => {
     toggleControllerVisibility();
   }
 });
+
+// Toggle the controller UI visibility
+function toggleControllerVisibility() {
+  isControllerVisible = !isControllerVisible;
+  const controllersDivs = document.querySelectorAll(".controller");
+  controllersDivs.forEach((div) => {
+    div.style.display = isControllerVisible ? "block" : "none";
+  });
+}
 
 window.addEventListener("gamepadconnected", connecthandler);
 window.addEventListener("gamepaddisconnected", disconnecthandler);
