@@ -60,7 +60,7 @@ function addgamepad(gamepad) {
   closeButton.className = "close-button";
   closeButton.addEventListener("click", () => {
     // Handle close button click
-    removegamepad(gamepad);
+    toggleControllerVisibility();
   });
   d.appendChild(closeButton);
 
