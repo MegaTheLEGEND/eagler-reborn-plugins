@@ -1,6 +1,7 @@
 const haveEvents = "ongamepadconnected" in window;
 const controllers = {};
 let isControllerVisible = false;
+const keyMappings = {};
 
 // Define the CSS styles inline
 const cssStyles = `
@@ -34,6 +35,23 @@ const cssStyles = `
     cursor: pointer;
     color: red; /* Red color for the 'X' button */
   }
+
+  /* Style for the key mapping modal */
+  .key-mapping-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .key-mapping-modal input[type="text"] {
+    width: 100px;
+  }
 `;
 
 // Create a style element and append the CSS styles to it
@@ -60,9 +78,17 @@ function addgamepad(gamepad) {
   closeButton.className = "close-button";
   closeButton.addEventListener("click", () => {
     // Handle close button click
-    toggleControllerVisibility();
+    removegamepad(gamepad);
   });
   d.appendChild(closeButton);
+
+  // Create a "Map Keys" button
+  const mapKeysButton = document.createElement("button");
+  mapKeysButton.textContent = "Map Keys";
+  mapKeysButton.addEventListener("click", () => {
+    openKeyMappingModal(gamepad.index);
+  });
+  d.appendChild(mapKeysButton);
 
   // Create content for controller UI
   const t = document.createElement("h1");
@@ -174,25 +200,59 @@ function scangamepads() {
   }
 }
 
-// Listen for the "\" key press to toggle the controller UI visibility
-document.addEventListener("keydown", (event) => {
-  if (event.key === "\\") {
-    toggleControllerVisibility();
-  }
-});
+// Function to open the key mapping modal
+function openKeyMappingModal(gamepadIndex) {
+  const modal = document.createElement("div");
+  modal.className = "key-mapping-modal";
 
-// Toggle the controller UI visibility
-function toggleControllerVisibility() {
-  isControllerVisible = !isControllerVisible;
-  const controllersDivs = document.querySelectorAll(".controller");
-  controllersDivs.forEach((div) => {
-    div.style.display = isControllerVisible ? "block" : "none";
+  // Create a list of buttons
+  const buttonList = document.createElement("ul");
+  controllers[gamepadIndex].buttons.forEach((button, i) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = `Button ${i}: `;
+
+    // Input field for key mapping
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = keyMappings[gamepadIndex]?.[i] || ""; // Use existing mapping if available
+    input.addEventListener("input", (event) => {
+      keyMappings[gamepadIndex] = keyMappings[gamepadIndex] || {};
+      keyMappings[gamepadIndex][i] = event.target.value;
+    });
+
+    listItem.appendChild(input);
+    buttonList.appendChild(listItem);
   });
+
+  // Save button
+  const saveButton = document.createElement("button");
+  saveButton.textContent = "Save";
+  saveButton.addEventListener("click", () => {
+    // Close the modal and update key mappings
+    document.body.removeChild(modal);
+  });
+
+  modal.appendChild(buttonList);
+  modal.appendChild(saveButton);
+
+  document.body.appendChild(modal);
 }
 
-window.addEventListener("gamepadconnected", connecthandler);
-window.addEventListener("gamepaddisconnected", disconnecthandler);
+// Update event listeners to use key mappings
+function handleButtonPress(event) {
+  const gamepadIndex = event.gamepad.index;
+  const buttonIndex = event.button;
 
-if (!haveEvents) {
-  setInterval(scangamepads, 500);
+  const keyMapping = keyMappings[gamepadIndex]?.[buttonIndex];
+  if (keyMapping) {
+    // Handle keyboard key press based on the user-defined key mapping
+    // You will need to implement this part.
+    console.log(`Button ${buttonIndex} mapped to key: ${keyMapping}`);
+  } else {
+    // Handle the button press as before
+    // ...
+  }
 }
+
+// Update event listeners to use the new handler
+window.addEventListener("gamepadbuttondown", handleButtonPress);
