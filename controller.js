@@ -1,4 +1,3 @@
-User
 const haveEvents = "ongamepadconnected" in window;
 const controllers = {};
 let isControllerVisible = false;
