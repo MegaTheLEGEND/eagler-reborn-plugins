@@ -60,6 +60,7 @@ styleElement.textContent = cssStyles;
 document.head.appendChild(styleElement);
 
 function connecthandler(e) {
+  console.log("Gamepad connected:", e.gamepad);
   if (!isControllerVisible) {
     addgamepad(e.gamepad);
   }
