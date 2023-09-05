@@ -5,10 +5,35 @@
 
 
 const plugin_name = "controller support" 
-
 const haveEvents = "ongamepadconnected" in window;
 const controllers = {};
 let isControllerVisible = false;
+
+// Define predefined functions for each button
+const buttonFunctions = {
+  Button0: () => {
+    // Predefined function for Button 0
+    console.log("Button 0 function executed.");
+    // Add your custom action code here
+  },
+  Button1: () => {
+    // Predefined function for Button 1
+    console.log("Button 1 function executed.");
+    // Add your custom action code here
+  },
+  ExampleFunction1: () => {
+    // Example predefined function 1
+    console.log("Example Function 1 executed.");
+    alert("This is an example function. You can customize it.");
+    // Add your custom action code here
+  },
+  ExampleFunction2: () => {
+    // Example predefined function 2
+    console.log("Example Function 2 executed.");
+    // Add your custom action code here
+  },
+  // Add more predefined functions for other buttons as needed
+};
 
 // Define the CSS styles inline
 const cssStyles = `
@@ -83,6 +108,29 @@ function addgamepad(gamepad) {
     const e = document.createElement("li");
     e.className = "button";
     e.textContent = `Button ${i}`;
+
+    // Create a dropdown menu
+    const dropdown = document.createElement("select");
+    dropdown.className = "dropdown-menu";
+
+    // Create options in the dropdown menu for predefined functions
+    for (const functionName in buttonFunctions) {
+      const option = document.createElement("option");
+      option.textContent = functionName;
+      dropdown.appendChild(option);
+    }
+
+    // Add an event listener to execute the selected predefined function
+    dropdown.addEventListener("change", () => {
+      const selectedFunctionName = dropdown.value;
+      const selectedFunction = buttonFunctions[selectedFunctionName];
+      if (selectedFunction) {
+        selectedFunction(); // Execute the selected function
+      }
+    });
+
+    // Append the button and dropdown menu to the UI
+    e.appendChild(dropdown);
     b.appendChild(e);
   });
   d.appendChild(b);
