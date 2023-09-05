@@ -2,9 +2,7 @@
 // but idk how to make it control the game itself.
 
 
-
-
-const plugin_name = "controller support" 
+const plugin_name = "controller support";
 const haveEvents = "ongamepadconnected" in window;
 const controllers = {};
 let isControllerVisible = false;
@@ -67,6 +65,16 @@ const cssStyles = `
     cursor: pointer;
     color: red; /* Red color for the 'X' button */
   }
+
+  /* Style for pressed buttons (green text color) */
+  .button.pressed {
+    color: #42f593; /* Green color for pressed buttons */
+  }
+
+  /* Style for dropdown containers */
+  .dropdown-container {
+    margin-top: 10px; /* Add some spacing below the button */
+  }
 `;
 
 // Create a style element and append the CSS styles to it
@@ -105,11 +113,21 @@ function addgamepad(gamepad) {
   const b = document.createElement("ul");
   b.className = "buttons";
   gamepad.buttons.forEach((button, i) => {
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "button-container";
+
     const e = document.createElement("li");
     e.className = "button";
-    e.textContent = `Button ${i}`;
 
-    // Create a dropdown menu
+    // Create a label for the button
+    const label = document.createElement("span");
+    label.textContent = `Button ${i}`;
+    e.appendChild(label);
+
+    // Create a unique ID for the dropdown
+    const dropdownId = `dropdown${i}`;
+
+    // Create the dropdown menu
     const dropdown = document.createElement("select");
     dropdown.className = "dropdown-menu";
 
@@ -120,6 +138,12 @@ function addgamepad(gamepad) {
       dropdown.appendChild(option);
     }
 
+    // Load the selected option from localStorage (if available)
+    const savedOption = loadSelectedOption(i);
+    if (savedOption) {
+      dropdown.value = savedOption;
+    }
+
     // Add an event listener to execute the selected predefined function
     dropdown.addEventListener("change", () => {
       const selectedFunctionName = dropdown.value;
@@ -127,11 +151,33 @@ function addgamepad(gamepad) {
       if (selectedFunction) {
         selectedFunction(); // Execute the selected function
       }
+      e.classList.add("pressed"); // Add a "pressed" class for button press
+      // Save the selected option to localStorage
+      saveSelectedOption(i, selectedFunctionName);
     });
 
-    // Append the button and dropdown menu to the UI
-    e.appendChild(dropdown);
-    b.appendChild(e);
+    // Wrap the dropdown in the div with a unique ID
+    buttonContainer.appendChild(dropdown);
+    buttonContainer.id = dropdownId;
+
+    // Add an event listener for button press to execute the selected function
+    e.addEventListener("click", () => {
+      const selectedFunctionName = dropdown.value;
+      const selectedFunction = buttonFunctions[selectedFunctionName];
+      if (selectedFunction) {
+        selectedFunction(); // Execute the selected function
+      }
+      e.classList.add("pressed"); // Add a "pressed" class for button press
+    });
+
+    // Add an event listener for button release to remove the "pressed" class
+    e.addEventListener("mouseup", () => {
+      e.classList.remove("pressed");
+    });
+
+    // Append the button and dropdown container to the button list
+    buttonContainer.appendChild(e);
+    b.appendChild(buttonContainer);
   });
   d.appendChild(b);
 
@@ -152,6 +198,16 @@ function addgamepad(gamepad) {
 
   // Set the controller UI as visible
   isControllerVisible = true;
+}
+
+// Function to save the selected option to localStorage
+function saveSelectedOption(buttonIndex, selectedOption) {
+  localStorage.setItem(`selectedOption${buttonIndex}`, selectedOption);
+}
+
+// Function to load the selected option from localStorage
+function loadSelectedOption(buttonIndex) {
+  return localStorage.getItem(`selectedOption${buttonIndex}`);
 }
 
 function disconnecthandler(e) {
