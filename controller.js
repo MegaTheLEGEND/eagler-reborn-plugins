@@ -1,310 +1,226 @@
-// This gets controller input to the page.
-// but idk how to make it control the game itself.
-
-
-const plugin_name = "controller support";
-const haveEvents = "ongamepadconnected" in window;
-const controllers = {};
-let isControllerVisible = false;
-
-// Define predefined functions for each button
-const buttonFunctions = {
-  Button0: () => {
-    // Predefined function for Button 0
-    console.log("Button 0 function executed.");
-    // Add your custom action code here
-  },
-  Button1: () => {
-    // Predefined function for Button 1
-    console.log("Button 1 function executed.");
-    // Add your custom action code here
-  },
-  ExampleFunction1: () => {
-    // Example predefined function 1
-    console.log("Example Function 1 executed.");
-    alert("This is an example function. You can customize it.");
-    // Add your custom action code here
-  },
-  ExampleFunction2: () => {
-    // Example predefined function 2
-    console.log("Example Function 2 executed.");
-    // Add your custom action code here
-  },
-  // Add more predefined functions for other buttons as needed
-};
-
-// Define the CSS styles inline
+PluginAPI.require("settings");
 const cssStyles = `
-  /* Style for the grey background */
-  body {
-    position: relative;
-    background-color: rgba(0, 0, 0, 0.5); /* Grey background with some transparency */
-    margin: 0;
-    padding: 0;
-    height: 100vh; /* Full viewport height */
-  }
+    .mod-menu {
+        display: none;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background-color: white;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        z-index: 999;
+        resize: both;
+        overflow: auto;
+        max-height: 80vh;
+        max-width: 80vw;
+        min-height: 50px;
+        min-width: 100px;
+    }
 
-  /* Style for the controller UI */
-  .controller {
-    position: absolute;
-    top: 50%; /* Center vertically */
-    left: 50%; /* Center horizontally */
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    z-index: 999; /* Make sure the UI is on top of everything */
-  }
+    .close-button {
+        cursor: pointer;
+        color: red;
+        float: right;
+    }
 
-  /* Style for the close button (red 'X') */
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    color: red; /* Red color for the 'X' button */
-  }
+    .controller-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
 
-  /* Style for pressed buttons (green text color) */
-  .button.pressed {
-    color: #42f593; /* Green color for pressed buttons */
-  }
+    .button {
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #000;
+        cursor: pointer;
+    }
 
-  /* Style for dropdown containers */
-  .dropdown-container {
-    margin-top: 10px; /* Add some spacing below the button */
-  }
+    .pressed {
+        background-color: green;
+    }
 `;
 
-// Create a style element and append the CSS styles to it
+
 const styleElement = document.createElement("style");
 styleElement.textContent = cssStyles;
 document.head.appendChild(styleElement);
 
-function connecthandler(e) {
-  if (!isControllerVisible) {
-    addgamepad(e.gamepad);
-  }
+const modMenu = document.createElement("div");
+modMenu.className = "mod-menu";
+modMenu.innerHTML = `
+    <div class="close-button" onclick="toggleModMenu()">X</div>
+    <h1>Controller Menu</h1>
+    <p>Press "\\" to show/hide this menu</p>
+    <div class="controller-options" id="controller-options"></div>
+`;
+
+
+document.body.appendChild(modMenu);
+
+// Variable to track the visibility of the mod menu
+let isModMenuVisible = false;
+
+// Function to open and close the mod menu visibility
+function toggleModMenu() {
+    isModMenuVisible = !isModMenuVisible;
+    modMenu.style.display = isModMenuVisible ? "block" : "none";
 }
 
-function addgamepad(gamepad) {
-  controllers[gamepad.index] = gamepad;
-
-  const d = document.createElement("div");
-  d.setAttribute("id", `controller${gamepad.index}`);
-  d.className = "controller";
-
-  // Create a close button
-  const closeButton = document.createElement("div");
-  closeButton.textContent = "X";
-  closeButton.className = "close-button";
-  closeButton.addEventListener("click", () => {
-    // Handle close button click
-    toggleControllerVisibility();
-  });
-  d.appendChild(closeButton);
-
-  // Create content for controller UI
-  const t = document.createElement("h1");
-  t.textContent = `gamepad: ${gamepad.id}`;
-  d.appendChild(t);
-
-  const b = document.createElement("ul");
-  b.className = "buttons";
-  gamepad.buttons.forEach((button, i) => {
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "button-container";
-
-    const e = document.createElement("li");
-    e.className = "button";
-
-    // Create a label for the button
-    const label = document.createElement("span");
-    label.textContent = `Button ${i}`;
-    e.appendChild(label);
-
-    // Create a unique ID for the dropdown
-    const dropdownId = `dropdown${i}`;
-
-    // Create the dropdown menu
-    const dropdown = document.createElement("select");
-    dropdown.className = "dropdown-menu";
-
-    // Create options in the dropdown menu for predefined functions
-    for (const functionName in buttonFunctions) {
-      const option = document.createElement("option");
-      option.textContent = functionName;
-      dropdown.appendChild(option);
-    }
-
-    // Load the selected option from localStorage (if available)
-    const savedOption = loadSelectedOption(i);
-    if (savedOption) {
-      dropdown.value = savedOption;
-    }
-
-    // Add an event listener to execute the selected predefined function
-    dropdown.addEventListener("change", () => {
-      const selectedFunctionName = dropdown.value;
-      const selectedFunction = buttonFunctions[selectedFunctionName];
-      if (selectedFunction) {
-        selectedFunction(); // Execute the selected function
-      }
-      e.classList.add("pressed"); // Add a "pressed" class for button press
-      // Save the selected option to localStorage
-      saveSelectedOption(i, selectedFunctionName);
-    });
-
-    // Wrap the dropdown in the div with a unique ID
-    buttonContainer.appendChild(dropdown);
-    buttonContainer.id = dropdownId;
-
-    // Add an event listener for button press to execute the selected function
-    e.addEventListener("click", () => {
-      const selectedFunctionName = dropdown.value;
-      const selectedFunction = buttonFunctions[selectedFunctionName];
-      if (selectedFunction) {
-        selectedFunction(); // Execute the selected function
-      }
-      e.classList.add("pressed"); // Add a "pressed" class for button press
-    });
-
-    // Add an event listener for button release to remove the "pressed" class
-    e.addEventListener("mouseup", () => {
-      e.classList.remove("pressed");
-    });
-
-    // Append the button and dropdown container to the button list
-    buttonContainer.appendChild(e);
-    b.appendChild(buttonContainer);
-  });
-  d.appendChild(b);
-
-  const a = document.createElement("div");
-  a.className = "axes";
-  gamepad.axes.forEach((axis, i) => {
-    const p = document.createElement("progress");
-    p.className = "axis";
-    p.setAttribute("max", "2");
-    p.setAttribute("value", "1");
-    p.textContent = i;
-    a.appendChild(p);
-  });
-  d.appendChild(a);
-
-  document.body.appendChild(d);
-  requestAnimationFrame(updateStatus);
-
-  // Set the controller UI as visible
-  isControllerVisible = true;
-}
-
-// Function to save the selected option to localStorage
-function saveSelectedOption(buttonIndex, selectedOption) {
-  localStorage.setItem(`selectedOption${buttonIndex}`, selectedOption);
-}
-
-// Function to load the selected option from localStorage
-function loadSelectedOption(buttonIndex) {
-  return localStorage.getItem(`selectedOption${buttonIndex}`);
-}
-
-function disconnecthandler(e) {
-  removegamepad(e.gamepad);
-}
-
-function removegamepad(gamepad) {
-  const d = document.getElementById(`controller${gamepad.index}`);
-  if (d) {
-    document.body.removeChild(d);
-  }
-  delete controllers[gamepad.index];
-  // Set the controller UI as not visible if no controllers are left
-  if (Object.keys(controllers).length === 0) {
-    isControllerVisible = false;
-    console.log("No controller connected");
-  }
-}
-
-function updateStatus() {
-  if (!haveEvents) {
-    scangamepads();
-  }
-
-  Object.entries(controllers).forEach(([i, controller]) => {
-    const d = document.getElementById(`controller${i}`);
-    const buttons = d.getElementsByClassName("button");
-
-    controller.buttons.forEach((button, i) => {
-      const b = buttons[i];
-      let pressed = button === 1.0;
-      let val = button;
-
-      if (typeof button === "object") {
-        pressed = val.pressed;
-        val = val.value;
-      }
-
-      const pct = `${Math.round(val * 100)}%`;
-      b.style.backgroundSize = `${pct} ${pct}`;
-      b.textContent = pressed ? `Button ${i} [PRESSED]` : `Button ${i}`;
-      b.style.color = pressed ? "#42f593" : "#2e2d33";
-      b.className = pressed ? "button pressed" : "button";
-    });
-
-    const axes = d.getElementsByClassName("axis");
-    controller.axes.forEach((axis, i) => {
-      const a = axes[i];
-      a.textContent = `${i}: ${axis.toFixed(4)}`;
-      a.setAttribute("value", axis + 1);
-    });
-  });
-
-  requestAnimationFrame(updateStatus);
-}
-
-function scangamepads() {
-  const gamepads = navigator.getGamepads();
-  const noDevicesElement = document.querySelector("#noDevices");
-
-  if (noDevicesElement) {
-    noDevicesElement.style.display = gamepads && gamepads.length && gamepads.filter(Boolean).length
-      ? "none"
-      : "block";
-  }
-
-  for (const gamepad of gamepads) {
-    if (gamepad) {
-      // Can be null if disconnected during the session
-      if (gamepad.index in controllers) {
-        controllers[gamepad.index] = gamepad;
-      } else {
-        addgamepad(gamepad);
-      }
-    }
-  }
-}
-
-// Listen for the "\" key press to toggle the controller UI visibility
+// Listen \ key press to open and close the mod menu visibility
 document.addEventListener("keydown", (event) => {
-  if (event.key === "\\") {
-    toggleControllerVisibility();
-  }
+    if (event.key === "\\") {
+        toggleModMenu();
+    }
 });
 
-// Toggle the controller UI visibility
-function toggleControllerVisibility() {
-  isControllerVisible = !isControllerVisible;
-  const controllersDivs = document.querySelectorAll(".controller");
-  controllersDivs.forEach((div) => {
-    div.style.display = isControllerVisible ? "block" : "none";
-  });
+// Define the list of controller buttons
+let buttonList = [
+    { 
+        name: "Jump", 
+        key: null, //this key is used for mapping the the physical key on the controller
+        onPress: () => setKeybindFromString("key.jump", true), 
+        onRelease: () => setKeybindFromString("key.jump", false), 
+        isPressed: false 
+    },
+    { 
+        name: "Sprint", 
+        key: null, 
+        onPress:  () => setKeybindFromString("key.sprint", false), 
+        onRelease: () => setKeybindFromString("key.sprint", false), 
+        isPressed: false 
+    },
+    { 
+        name: "Use", 
+        key: null, 
+        onPress: () => setKeybindFromString("key.use", false), 
+        onRelease:  () => setKeybindFromString("key.use", false), 
+        isPressed: false 
+    },
+    { 
+        name: "Mine", 
+        key: null, 
+        onPress: () => setKeybindFromString("key.attack", false), 
+        onRelease: () => setKeybindFromString("key.attack", false), 
+        isPressed: false 
+    },
+	{ 
+        name: "sneak", 
+        key: null, 
+        onPress: () => setKeybindFromString("key.sneak", false), 
+        onRelease: () => setKeybindFromString("key.sneak", false), 
+        isPressed: false 
+    }
+];
+
+// Variable to track if assigning input is in progress
+let assigningInput = false;
+
+// Function to assign input to controller buttons
+function assignInput(buttonName) {
+    const assignedButton = buttonList.find(button => button.name === buttonName);
+
+    assignedButton.key = null;
+    assignedButton.isPressed = false;
+
+    const promptMessage = `Press the corresponding button on the controller for ${buttonName}`;
+    const promptContainer = document.createElement("div");
+    promptContainer.innerHTML = `<p>${promptMessage}</p>`;
+    document.body.appendChild(promptContainer);
+
+    const checkGamepad = () => {
+        const gamepad = navigator.getGamepads()[0];
+
+        if (gamepad && gamepad.buttons) {
+            const pressedButtonIndex = gamepad.buttons.findIndex(button => button.pressed);
+
+            if (pressedButtonIndex !== -1 && !buttonList.some(button => button.key === pressedButtonIndex)) {
+                assignedButton.key = pressedButtonIndex;
+                assignedButton.onPress = () => {
+                    if (!assignedButton.isPressed) {
+                        assignedButton.isPressed = true;
+                        assignedButton.buttonElement.classList.add('pressed');
+                        console.log(`${buttonName} pressed`);
+						assignedButton.onPress();
+                    }
+                };
+                assignedButton.onRelease = () => {
+                    if (assignedButton.isPressed) {
+                        assignedButton.isPressed = false;
+                        assignedButton.buttonElement.classList.remove('pressed');
+                        console.log(`${buttonName} released`);
+						assignedButton.onRelease();
+                    }
+                };
+                console.log(`Assigned input for ${buttonName}: Button ${pressedButtonIndex}`);
+                promptContainer.innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
+                setTimeout(() => {
+                    promptContainer.remove();
+                    assigningInput = false;
+                }, 1000); // Remove the prompt after 1 second
+            } else {
+                // No button pressed or already assigned
+                setTimeout(checkGamepad, 100);
+            }
+        } else {
+            setTimeout(checkGamepad, 100);
+        }
+    };
+
+    checkGamepad();
 }
 
-window.addEventListener("gamepadconnected", connecthandler);
-window.addEventListener("gamepaddisconnected", disconnecthandler);
+// Function to set up the controller buttons
+function setupButtons() {
+    const controllerOptions = document.getElementById('controller-options');
 
-if (!haveEvents) {
-  setInterval(scangamepads, 500);
+    buttonList.forEach(button => {
+        button.buttonElement = document.createElement("div");
+        button.buttonElement.classList.add('button');
+        button.buttonElement.innerText = button.name;
+        button.buttonElement.addEventListener('click', () => {
+            if (!assigningInput) {
+                assigningInput = true;
+                assignInput(button.name);
+            }
+        });
+        controllerOptions.appendChild(button.buttonElement);
+    });
 }
+
+// function to handle gamepad input
+function handleGamepad() {
+    const gamepad = navigator.getGamepads()[0];
+
+    if (gamepad && gamepad.buttons) {
+        console.log(gamepad.buttons); // log button states
+
+        buttonList.forEach(button => {
+            const buttonState = gamepad.buttons[button.key];
+
+            if (buttonState && buttonState.pressed && button.onPress) {
+                
+                button.onPress();
+            } else if (buttonState && !buttonState.pressed && button.onRelease) {
+                
+                button.onRelease();
+            }
+        });
+    }
+
+    requestAnimationFrame(handleGamepad);
+}
+
+function setKeybindFromString(keybindId, pressed) {
+    PluginAPI.settings.keyBindings.forEach(k => {
+        if (k.keyDescription === keybindId) {
+            k.pressed = pressed;
+            k.reload();
+        }
+    });
+}
+
+// set up the controller buttons and handle gamepad input
+setupButtons();
+handleGamepad();
