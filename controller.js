@@ -78,41 +78,161 @@ document.addEventListener("keydown", (event) => {
 // Define the list of controller buttons
 let buttonList = [
     { 
-        name: "Jump", 
-        key: null, //this key is used for mapping the the physical key on the controller
-        onPress: () => setKeybindFromString("key.jump", true), 
-        onRelease: () => setKeybindFromString("key.jump", false), 
-        isPressed: false 
+        name: "jump", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.jump", true), 
+        onReleaseAction: () => setKeybindFromString("key.jump", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
     },
     { 
-        name: "Sprint", 
+        name: "sprint", 
         key: null, 
-        onPress:  () => setKeybindFromString("key.sprint", false), 
-        onRelease: () => setKeybindFromString("key.sprint", false), 
-        isPressed: false 
+        onPressAction: () => setKeybindFromString("key.sprint", true), 
+        onReleaseAction: () => setKeybindFromString("key.sprint", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
     },
     { 
-        name: "Use", 
+        name: "use", 
         key: null, 
-        onPress: () => setKeybindFromString("key.use", false), 
-        onRelease:  () => setKeybindFromString("key.use", false), 
-        isPressed: false 
+        onPressAction: () => setKeybindFromString("key.use", true), 
+        onReleaseAction: () => setKeybindFromString("key.use", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
     },
     { 
-        name: "Mine", 
+        name: "attack", 
         key: null, 
-        onPress: () => setKeybindFromString("key.attack", false), 
-        onRelease: () => setKeybindFromString("key.attack", false), 
-        isPressed: false 
+        onPressAction: () => setKeybindFromString("key.attack", true), 
+        onReleaseAction: () => setKeybindFromString("key.attack", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
     },
-	{ 
+    { 
         name: "sneak", 
         key: null, 
-        onPress: () => setKeybindFromString("key.sneak", false), 
-        onRelease: () => setKeybindFromString("key.sneak", false), 
-        isPressed: false 
+        onPressAction: () => setKeybindFromString("key.sneak", true), 
+        onReleaseAction: () => setKeybindFromString("key.sneak", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "inventory", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.inventory", true), 
+        onReleaseAction: () => setKeybindFromString("key.inventory", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "drop", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.drop", true), 
+        onReleaseAction: () => setKeybindFromString("key.drop", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "pickItem", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.pickItem", true), 
+        onReleaseAction: () => setKeybindFromString("key.pickItem", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "chat", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.chat", true), 
+        onReleaseAction: () => setKeybindFromString("key.chat", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "playerlist", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.playerlist", true), 
+        onReleaseAction: () => setKeybindFromString("key.playerlist", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "command", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.command", true), 
+        onReleaseAction: () => setKeybindFromString("key.command", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "screenshot", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.screenshot", true), 
+        onReleaseAction: () => setKeybindFromString("key.screenshot", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "togglePerspective", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.togglePerspective", true), 
+        onReleaseAction: () => setKeybindFromString("key.togglePerspective", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "smoothCamera", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.smoothCamera", true), 
+        onReleaseAction: () => setKeybindFromString("key.smoothCamera", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "zoomCamera", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.zoomCamera", true), 
+        onReleaseAction: () => setKeybindFromString("key.zoomCamera", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "function", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.function", true), 
+        onReleaseAction: () => setKeybindFromString("key.function", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+    { 
+        name: "close", 
+        key: null, 
+        onPressAction: () => setKeybindFromString("key.close", true), 
+        onReleaseAction: () => setKeybindFromString("key.close", false), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
     }
 ];
+
+
 
 // Variable to track if assigning input is in progress
 let assigningInput = false;
@@ -194,17 +314,20 @@ function handleGamepad() {
     const gamepad = navigator.getGamepads()[0];
 
     if (gamepad && gamepad.buttons) {
-        console.log(gamepad.buttons); // log button states
+        //console.log(gamepad.buttons); // log button states
 
         buttonList.forEach(button => {
             const buttonState = gamepad.buttons[button.key];
 
             if (buttonState && buttonState.pressed && button.onPress) {
-                
-                button.onPress();
+                button.onPress();// turn the button green
+		button.onPressAction(); // do the actual in game action
+				
+				
             } else if (buttonState && !buttonState.pressed && button.onRelease) {
-                
-                button.onRelease();
+                button.onRelease(); // turn the button white
+		button.onReleaseAction(); // stop the actual in game action
+				
             }
         });
     }
