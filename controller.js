@@ -1,6 +1,7 @@
 PluginAPI.require("settings");
 PluginAPI.require("player");
 const cssStyles = `
+	@import url('https://fonts.googleapis.com/css?family=Roboto');
     .mod-menu {
         display: none;
         position: fixed;
@@ -41,6 +42,9 @@ const cssStyles = `
     .pressed {
         background-color: green;
     }
+	.header{
+		font-family: 'Roboto';
+	}
 `;
 
 
@@ -52,11 +56,10 @@ const modMenu = document.createElement("div");
 modMenu.className = "mod-menu";
 modMenu.innerHTML = `
     <div class="close-button" onclick="toggleModMenu()">X</div>
-    <h1>Controller Menu</h1>
-    <p>Press "\\" to show/hide this menu</p>
+    <h1 class="header">Controller Menu by MegaTheLEGEND</h1>
+    <div id="infoText"> <p>Press "\\" to show/hide this menu</p></div>
     <div class="controller-options" id="controller-options"></div>
 `;
-
 
 document.body.appendChild(modMenu);
 
@@ -64,9 +67,16 @@ document.body.appendChild(modMenu);
 let isModMenuVisible = false;
 
 // Function to open and close the mod menu visibility
-function toggleModMenu() {
-    isModMenuVisible = !isModMenuVisible;
-    modMenu.style.display = isModMenuVisible ? "block" : "none";
+function toggleModMenu(isIt) {
+	
+	if (isIt == null){
+		isModMenuVisible = !isModMenuVisible;
+		modMenu.style.display = isModMenuVisible ? "block" : "none";
+	} else if (isIt == "show"){
+		modMenu.style.display = "block";
+	} else if (isIt == "hide"){
+		modMenu.style.display = "none";
+	}
 }
 
 // Listen \ key press to open and close the mod menu visibility
@@ -288,9 +298,7 @@ function assignInput(buttonName) {
     assignedButton.isPressed = false;
 
     const promptMessage = `Press the corresponding button on the controller for ${buttonName}`;
-    const promptContainer = document.createElement("div");
-    promptContainer.innerHTML = `<p>${promptMessage}</p>`;
-    document.body.appendChild(promptContainer);
+    document.getElementById("infoText").innerHTML = `<p>${promptMessage}</p>`;
 
     const checkGamepad = () => {
         const gamepad = navigator.getGamepads()[0];
@@ -317,9 +325,9 @@ function assignInput(buttonName) {
                     }
                 };
                 console.log(`Assigned input for ${buttonName}: Button ${pressedButtonIndex}`);
-                promptContainer.innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
+                document.getElementById("infoText").innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
                 setTimeout(() => {
-                    promptContainer.remove();
+                    document.getElementById("infoText").innerHTML += `<p>Press "\\" to show/hide this menu</p>`;
                     assigningInput = false;
                 }, 1000); // Remove the prompt after 1 second
             } else {
