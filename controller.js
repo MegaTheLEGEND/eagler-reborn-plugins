@@ -1,4 +1,5 @@
 PluginAPI.require("settings");
+PluginAPI.require("player");
 const cssStyles = `
     .mod-menu {
         display: none;
@@ -229,7 +230,49 @@ let buttonList = [
         isPressed: false,
         onPress: null,
         onRelease: null
+    },
+	{ 
+        name: "Increment Inventory", 
+        key: null, 
+        onPressAction: () =>{
+		
+		let newHotbarNumber = PluginAPI.player.inventory.currentItem + 1;
+		if (newHotbarNumber > 8){
+			newHotbarNumber = 0;
+			throttledSetHotbarSlot(newHotbarNumber);
+			console.log("setting bar to: "+ newHotbarNumber);//log
+			}else {
+			throttledSetHotbarSlot(newHotbarNumber);
+			console.log("setting bar to: "+ newHotbarNumber);//log
+			}
+		}, 
+        onReleaseAction: () => PluginAPI.player.inventory.reload(), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
+    },
+	{ 
+        name: "Decrement Inventory", 
+        key: null, 
+        onPressAction: () =>{ 
+		
+		let newHotbarNumber = PluginAPI.player.inventory.currentItem - 1;
+		if (newHotbarNumber < 0){
+			newHotbarNumber = 8;
+			throttledSetHotbarSlot(newHotbarNumber);
+			console.log("setting bar to: "+ newHotbarNumber); //log
+			} else {
+			throttledSetHotbarSlot(newHotbarNumber);
+			console.log("setting bar to: "+ newHotbarNumber);//log
+			}
+		
+		}, 
+        onReleaseAction: () => PluginAPI.player.inventory.reload(), 
+        isPressed: false,
+        onPress: null,
+        onRelease: null
     }
+	
 ];
 
 
@@ -241,7 +284,7 @@ let assigningInput = false;
 function assignInput(buttonName) {
     const assignedButton = buttonList.find(button => button.name === buttonName);
 
-    assignedButton.key = null;
+    //assignedButton.key = null;
     assignedButton.isPressed = false;
 
     const promptMessage = `Press the corresponding button on the controller for ${buttonName}`;
@@ -343,6 +386,32 @@ function setKeybindFromString(keybindId, pressed) {
         }
     });
 }
+
+//rate limit the hot bar lol
+//if you dont it skips to many bar spots on one click
+function throttle(func, delay) {
+  let lastCall = 0;
+
+  return function (...args) {
+    const now = new Date().getTime();
+
+    if (now - lastCall >= delay) {
+      func(...args);
+      lastCall = now;
+    }
+  };
+}
+
+
+function setHotbarSlot(slot) {
+  PluginAPI.player.inventory.currentItem = slot;
+}
+
+// Throttle the function to be called once every so many seconds
+var throttledSetHotbarSlot = throttle(setHotbarSlot, 120); 
+
+
+
 
 // set up the controller buttons and handle gamepad input
 setupButtons();
