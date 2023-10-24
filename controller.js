@@ -1,5 +1,11 @@
 PluginAPI.require("settings");
 PluginAPI.require("player");
+
+
+// set the stick dead zones
+let leftStickDeadZone = .4;
+let rightStickDeadZone = .4;
+
 const cssStyles = `
 	@import url('https://fonts.googleapis.com/css?family=Roboto');
     .mod-menu {
@@ -420,7 +426,78 @@ var throttledSetHotbarSlot = throttle(setHotbarSlot, 120);
 
 
 
+// Function to handle gamepad axis changes
+function handleGamepadAxes() {
+    const gamepad = navigator.getGamepads()[0];
+		
+		if (!gamepad){
+		console.log("your gamepad is not working good probably")
+		return;
+		}else if (gamepad.axes) {
+        // Access the axes values
+        const [leftStickX, leftStickY, rightStickX, rightStickY] = gamepad.axes;
 
+        // Log the axes values
+        //console.log(`Left Stick X: ${leftStickX}, Left Stick Y: ${leftStickY}`);
+        //console.log(`Right Stick X: ${rightStickX}, Right Stick Y: ${rightStickY}`);
+		
+		//handle left stick
+		
+		if (leftStickY > leftStickDeadZone){
+			setKeybindFromString("key.back", true); //move backwards
+		} else if (leftStickY < Math.abs(leftStickDeadZone) * -1){
+			setKeybindFromString("key.forward", true);// move forwards
+		}else {
+			setKeybindFromString("key.forward", false); //disable the W/S buttons when stick is neutral
+			setKeybindFromString("key.back", false);
+		}
+		
+		if (leftStickX > leftStickDeadZone){
+			setKeybindFromString("key.right", true);// move right
+		} else if (leftStickX < Math.abs(leftStickDeadZone) * -1){
+			setKeybindFromString("key.left", true); //move left
+		}else {
+			setKeybindFromString("key.left", false); //disable the a/d buttons when stick is neutral
+			setKeybindFromString("key.right", false);
+		}
+		
+		//handle right stick
+		
+		if (rightStickY > rightStickDeadZone){
+			// write a script to move the view down
+			
+		} else if (rightStickY < Math.abs(rightStickDeadZone) * -1){
+			// write a script to move the view up
+			
+			
+		}else {
+			// write a script to stop movement
+			
+		}
+		
+		
+		if (rightStickX > rightStickDeadZone){
+			// write a script to move the view right
+			
+		} else if (rightStickX < Math.abs(rightStickDeadZone) * -1){
+			// write a script to move the view left
+			
+			
+		}else {
+			// write a script to stop movement
+			
+		}
+		
+	}
+
+    // Request the next animation frame
+    requestAnimationFrame(handleGamepadAxes);
+}
+
+
+
+// Call the new function to start listening for gamepad axes changes
+handleGamepadAxes();
 // set up the controller buttons and handle gamepad input
 setupButtons();
-handleGamepad();
+handleGamepad()
