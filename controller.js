@@ -63,7 +63,7 @@ modMenu.className = "mod-menu";
 modMenu.innerHTML = `
     <div class="close-button" onclick="toggleModMenu()">X</div>
     <h1 class="header">Controller Menu by MegaTheLEGEND</h1>
-    <div id="infoText"> <p>Press "\\" to show/hide this menu</p></div>
+    <div id="infoText"> <p>Press "\\" to show/hide this menu</p><p>Warning this plugin seems to crash the game if it is used while not in a server.</p></div>
     <div class="controller-options" id="controller-options"></div>
 `;
 
@@ -297,55 +297,61 @@ let buttonList = [
 let assigningInput = false;
 
 // Function to assign input to controller buttons
-function assignInput(buttonName) {
-    const assignedButton = buttonList.find(button => button.name === buttonName);
+function assignInput(buttonName, preMap) {
 
-    //assignedButton.key = null;
-    assignedButton.isPressed = false;
+    if (preMap == null){
+        const assignedButton = buttonList.find(button => button.name === buttonName);
 
-    const promptMessage = `Press the corresponding button on the controller for ${buttonName}`;
-    document.getElementById("infoText").innerHTML = `<p>${promptMessage}</p>`;
+        //assignedButton.key = null;
+        assignedButton.isPressed = false;
 
-    const checkGamepad = () => {
-        const gamepad = navigator.getGamepads()[0];
+        const promptMessage = `Press the corresponding button on the controller for ${buttonName}`;
+        document.getElementById("infoText").innerHTML = `<p>${promptMessage}</p>`;
 
-        if (gamepad && gamepad.buttons) {
-            const pressedButtonIndex = gamepad.buttons.findIndex(button => button.pressed);
+        const checkGamepad = () => {
+            const gamepad = navigator.getGamepads()[0];
 
-            if (pressedButtonIndex !== -1 && !buttonList.some(button => button.key === pressedButtonIndex)) {
-                assignedButton.key = pressedButtonIndex;
-                assignedButton.onPress = () => {
-                    if (!assignedButton.isPressed) {
-                        assignedButton.isPressed = true;
-                        assignedButton.buttonElement.classList.add('pressed');
-                        console.log(`${buttonName} pressed`);
-						assignedButton.onPress();
-                    }
-                };
-                assignedButton.onRelease = () => {
-                    if (assignedButton.isPressed) {
-                        assignedButton.isPressed = false;
-                        assignedButton.buttonElement.classList.remove('pressed');
-                        console.log(`${buttonName} released`);
-						assignedButton.onRelease();
-                    }
-                };
-                console.log(`Assigned input for ${buttonName}: Button ${pressedButtonIndex}`);
-                document.getElementById("infoText").innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
-                setTimeout(() => {
-                    document.getElementById("infoText").innerHTML += `<p>Press "\\" to show/hide this menu</p>`;
-                    assigningInput = false;
-                }, 1000); // Remove the prompt after 1 second
+            if (gamepad && gamepad.buttons) {
+                const pressedButtonIndex = gamepad.buttons.findIndex(button => button.pressed);
+
+                if (pressedButtonIndex !== -1 && !buttonList.some(button => button.key === pressedButtonIndex)) {
+                    assignedButton.key = pressedButtonIndex;
+                    assignedButton.onPress = () => {
+                        if (!assignedButton.isPressed) {
+                            assignedButton.isPressed = true;
+                            assignedButton.buttonElement.classList.add('pressed');
+                            console.log(`${buttonName} pressed`);
+    						assignedButton.onPress();
+                        }
+                    };
+                    assignedButton.onRelease = () => {
+                        if (assignedButton.isPressed) {
+                            assignedButton.isPressed = false;
+                            assignedButton.buttonElement.classList.remove('pressed');
+                            console.log(`${buttonName} released`);
+    						assignedButton.onRelease();
+                        }
+                    };
+                    console.log(`Assigned input for ${buttonName}: Button ${pressedButtonIndex}`);
+                    document.getElementById("infoText").innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
+                    setTimeout(() => {
+                        document.getElementById("infoText").innerHTML += `<p>Press "\\" to show/hide this menu</p>`;
+                        assigningInput = false;
+                    }, 1000); // Remove the prompt after 1 second
+                } else {
+                    // No button pressed or already assigned
+                    setTimeout(checkGamepad, 100);
+                }
             } else {
-                // No button pressed or already assigned
                 setTimeout(checkGamepad, 100);
             }
-        } else {
-            setTimeout(checkGamepad, 100);
-        }
-    };
+        };
 
-    checkGamepad();
+        checkGamepad();
+  }else if (preMap != null){
+    //auto map!
+    alert("preMap was not null!")
+  }
 }
 
 // Function to set up the controller buttons
@@ -439,24 +445,33 @@ function handleGamepadAxes() {
         //console.log(`Left Stick X: ${leftStickX}, Left Stick Y: ${leftStickY}`);
         //console.log(`Right Stick X: ${rightStickX}, Right Stick Y: ${rightStickY}`);
 		
+    //set the average speed (but not working. it crashes the game)
+    // var averageSpeed = (Math.abs(leftStickX) + Math.abs(leftStickY) + Math.abs(rightStickX) + Math.abs(rightStickY)) / 4;
+
 		//handle left stick
 		
 		if (leftStickY > leftStickDeadZone){
 			setKeybindFromString("key.back", true); //move backwards
+      //setPlayerWalkSpeed({speed: averageSpeed});
 		} else if (leftStickY < Math.abs(leftStickDeadZone) * -1){
 			setKeybindFromString("key.forward", true);// move forwards
+     // setPlayerWalkSpeed({speed: Math.abs(averageSpeed)});
 		}else {
 			setKeybindFromString("key.forward", false); //disable the W/S buttons when stick is neutral
 			setKeybindFromString("key.back", false);
+     // setPlayerWalkSpeed({speed: 1});
 		}
 		
 		if (leftStickX > leftStickDeadZone){
 			setKeybindFromString("key.right", true);// move right
+     // setPlayerWalkSpeed({speed: averageSpeed});
 		} else if (leftStickX < Math.abs(leftStickDeadZone) * -1){
 			setKeybindFromString("key.left", true); //move left
+    //  setPlayerWalkSpeed({speed: Math.abs(averageSpeed)});
 		}else {
 			setKeybindFromString("key.left", false); //disable the a/d buttons when stick is neutral
 			setKeybindFromString("key.right", false);
+     // setPlayerWalkSpeed({speed: 1});
 		}
 		
 		//handle right stick
