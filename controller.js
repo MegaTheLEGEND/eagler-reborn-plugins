@@ -430,10 +430,8 @@ var throttledSetHotbarSlot = throttle(setHotbarSlot, 120);
 function handleGamepadAxes() {
     const gamepad = navigator.getGamepads()[0];
 		
-		if (!gamepad){
-		console.log("your gamepad is not working good probably")
-		return;
-		}else if (gamepad.axes) {
+		
+		if (gamepad && gamepad.axes) {
         // Access the axes values
         const [leftStickX, leftStickY, rightStickX, rightStickY] = gamepad.axes;
 
@@ -474,7 +472,6 @@ function handleGamepadAxes() {
 			// write a script to stop movement
 			
 		}
-		
 		
 		if (rightStickX > rightStickDeadZone){
 			// write a script to move the view right
