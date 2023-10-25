@@ -6,7 +6,7 @@
 aims to bring controller support to eagler reborn.
 
 #### Does it work???? 
-* you can use on or off type buttons right now.
+* you can use on or off type buttons.
 * The move stick works.
 * saves controller maping.
 
