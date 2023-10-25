@@ -78,8 +78,12 @@ function toggleModMenu(isIt) {
 	if (isIt == null){
 		isModMenuVisible = !isModMenuVisible;
 		modMenu.style.display = isModMenuVisible ? "block" : "none";
+		if (document.pointerLockElement != null) {
+			document.exitPointerLock();
+		}
 	} else if (isIt == "show"){
 		modMenu.style.display = "block";
+        document.exitPointerLock()
 	} else if (isIt == "hide"){
 		modMenu.style.display = "none";
 	}
@@ -296,7 +300,6 @@ let buttonList = [
 // Variable to track if assigning input is in progress
 let assigningInput = false;
 
-// Function to assign input to controller buttons
 function assignInput(buttonName, preMap) {
 
     if (preMap == null){
@@ -334,6 +337,7 @@ function assignInput(buttonName, preMap) {
                     };
                     console.log(`Assigned input for ${buttonName}: Button ${pressedButtonIndex}`);
                     document.getElementById("infoText").innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
+					saveButtonMappings();
                     setTimeout(() => {
                         document.getElementById("infoText").innerHTML += `<p>Press "\\" to show/hide this menu</p>`;
                         assigningInput = false;
@@ -349,10 +353,55 @@ function assignInput(buttonName, preMap) {
 
         checkGamepad();
   }else if (preMap != null){
-    //auto map!
-    alert("preMap was not null!")
+    const assignedButton = buttonList.find(button => button.name === buttonName);
+
+        assignedButton.key = preMap;
+        assignedButton.isPressed = false;
+
+        const checkGamepad = () => {
+            const gamepad = navigator.getGamepads()[0];
+
+            if (true) { //idk why lol 
+                const pressedButtonIndex = preMap;
+
+                if (true /*pressedButtonIndex !== -1 && !buttonList.some(button => button.key === pressedButtonIndex)*/) {
+					console.log("line 368 has ran! "+ assignedButton);
+                    assignedButton.key = pressedButtonIndex;
+                    assignedButton.onPress = () => {
+                        if (!assignedButton.isPressed) {
+                            assignedButton.isPressed = true;
+                            assignedButton.buttonElement.classList.add('pressed');
+                            console.log(`${buttonName} pressed`);
+    						assignedButton.onPress();
+                        }
+                    };
+                    assignedButton.onRelease = () => {
+                        if (assignedButton.isPressed) {
+                            assignedButton.isPressed = false;
+                            assignedButton.buttonElement.classList.remove('pressed');
+                            console.log(`${buttonName} released`);
+    						assignedButton.onRelease();
+                        }
+                    };
+                    console.log(`auto Assigned input for ${buttonName}: Button ${pressedButtonIndex}`);
+                    document.getElementById("infoText").innerHTML += `<p>Input assigned: ${buttonName} (Button: ${pressedButtonIndex})</p>`;
+                    setTimeout(() => {
+                        document.getElementById("infoText").innerHTML += `<p>Press "\\" to show/hide this menu</p>`;
+                        assigningInput = false;
+                    }, 1000); // Remove the prompt after 1 second
+                } else {
+                    // No button pressed or already assigned
+                    setTimeout(checkGamepad, 100);
+                }
+            } else {
+                setTimeout(checkGamepad, 100);
+            }
+        };
+
+        checkGamepad();
   }
 }
+
 
 // Function to set up the controller buttons
 function setupButtons() {
@@ -372,31 +421,34 @@ function setupButtons() {
     });
 }
 
-// function to handle gamepad input
+// Function to handle gamepad input
 function handleGamepad() {
     const gamepad = navigator.getGamepads()[0];
 
     if (gamepad && gamepad.buttons) {
-        //console.log(gamepad.buttons); // log button states
-
         buttonList.forEach(button => {
             const buttonState = gamepad.buttons[button.key];
 
-            if (buttonState && buttonState.pressed && button.onPress) {
-                button.onPress();// turn the button green
-		button.onPressAction(); // do the actual in game action
-				
-				
-            } else if (buttonState && !buttonState.pressed && button.onRelease) {
-                button.onRelease(); // turn the button white
-		button.onReleaseAction(); // stop the actual in game action
-				
+            if (buttonState && buttonState.pressed && !button.isPressed) {
+                button.isPressed = true;
+                button.buttonElement.classList.add('pressed');
+                console.log(`${button.name} pressed`);
+                button.onPress();
+				button.onPressAction();
+            } else if (buttonState && !buttonState.pressed && button.isPressed) {
+                button.isPressed = false;
+                button.buttonElement.classList.remove('pressed');
+                console.log(`${button.name} released`);
+                button.onRelease();
+				button.onReleaseAction();
             }
         });
     }
 
     requestAnimationFrame(handleGamepad);
 }
+
+
 
 function setKeybindFromString(keybindId, pressed) {
     PluginAPI.settings.keyBindings.forEach(k => {
@@ -425,10 +477,11 @@ function throttle(func, delay) {
 
 function setHotbarSlot(slot) {
   PluginAPI.player.inventory.currentItem = slot;
+  PluginAPI.player.inventory.reload();
 }
 
 // Throttle the function to be called once every so many seconds
-var throttledSetHotbarSlot = throttle(setHotbarSlot, 120); 
+var throttledSetHotbarSlot = throttle(setHotbarSlot, 050); 
 
 
 
@@ -508,8 +561,51 @@ function handleGamepadAxes() {
 
 
 
-// Call the new function to start listening for gamepad axes changes
-handleGamepadAxes();
-// set up the controller buttons and handle gamepad input
-setupButtons();
-handleGamepad()
+// Define an empty JSON object to store button mappings
+let buttonMappingJSON = {};
+
+// Function to save button mappings to JSON
+function saveButtonMappings() {
+	console.log("saving buttons!")
+    buttonMappingJSON = {};
+    buttonList.forEach(button => {
+        buttonMappingJSON[button.name] = button.key;
+    });
+
+    // Convert the JSON object to a string and save it to local storage
+    localStorage.setItem('buttonMappingJSON', JSON.stringify(buttonMappingJSON));
+}
+
+
+// Function to load button mappings from JSON
+function loadButtonMappings() {
+    // Retrieve the JSON string from local storage
+    const savedButtonMappings = localStorage.getItem('buttonMappingJSON');
+	console.log("loading button save!")
+    if (savedButtonMappings) {
+        // Parse the JSON string to get the button mappings
+        buttonMappingJSON = JSON.parse(savedButtonMappings);
+
+        // Apply the saved button mappings
+        buttonList.forEach(button => {
+            const savedKey = buttonMappingJSON[button.name];
+            if (savedKey !== undefined && savedKey !== null) {
+                button.key = savedKey;
+                // Call assignInput to apply the loaded mapping
+                assignInput(button.name, savedKey);
+            }
+        });
+    }
+}
+
+
+// lets gooooo
+function initializePlugin() {
+    handleGamepadAxes();
+	setTimeout(() => setupButtons(), 9500);
+    handleGamepad();
+	setTimeout(() => loadButtonMappings(), 8000);
+}
+
+// Call the initialization function
+initializePlugin();
