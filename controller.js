@@ -4,7 +4,8 @@ PluginAPI.require("player");
 
 // set the stick dead zones
 let leftStickDeadZone = .4;
-let rightStickDeadZone = .4;
+let rightStickDeadZone = .15;
+let viewSpeedMultiplier = 3.5;
 
 const cssStyles = `
 	@import url('https://fonts.googleapis.com/css?family=Roboto');
@@ -460,7 +461,6 @@ function setKeybindFromString(keybindId, pressed) {
 }
 
 //rate limit the hot bar lol
-//if you dont it skips to many bar spots on one click
 function throttle(func, delay) {
   let lastCall = 0;
 
@@ -483,7 +483,15 @@ function setHotbarSlot(slot) {
 // Throttle the function to be called once every so many seconds
 var throttledSetHotbarSlot = throttle(setHotbarSlot, 050); 
 
+function changePitch(distance){
+	PluginAPI.player.pitch += distance * viewSpeedMultiplier;
+	PluginAPI.player.reload();
+}
 
+function changeYaw(distance){
+	PluginAPI.player.yaw += distance * viewSpeedMultiplier;
+	PluginAPI.player.reload();
+}
 
 // Function to handle gamepad axis changes
 function handleGamepadAxes() {
@@ -531,26 +539,28 @@ function handleGamepadAxes() {
 		
 		if (rightStickY > rightStickDeadZone){
 			// write a script to move the view down
+			changePitch(rightStickY);
 			
 		} else if (rightStickY < Math.abs(rightStickDeadZone) * -1){
 			// write a script to move the view up
-			
+			changePitch(rightStickY);
 			
 		}else {
 			// write a script to stop movement
+			//unneeded 
 			
 		}
 		
 		if (rightStickX > rightStickDeadZone){
 			// write a script to move the view right
-			
+			changeYaw(rightStickX);
 		} else if (rightStickX < Math.abs(rightStickDeadZone) * -1){
 			// write a script to move the view left
-			
+			changeYaw(rightStickX);
 			
 		}else {
 			// write a script to stop movement
-			
+			//unneeded 
 		}
 		
 	}
